@@ -55,15 +55,15 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     content_length = 0
     # ヘッダを受信して解析・・・Content-Lengthを得る
     while True:
-        line = read_line_from_socket(s).decode('utf-8')
-        chunks = line.split(':', 1)
-        if len(chunks) == 2 and chunks[0] == 'Content-Length':
+        line = read_line_from_socket(s)
+        chunks = line.split(b':', 1)
+        if len(chunks) == 2 and chunks[0] == b'Content-Length':
             content_length = int(chunks[1])
         if len(line) == 0:
             break
 
     # データを受信
-    received_data= bytearray(b'')
+    received_data = b''
     while len(received_data) < content_length:
         received_bytes = s.recv(READBUF_LENGTH)
         if len(received_bytes) <= 0:
@@ -71,4 +71,4 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         received_data += received_bytes
 
 # 受信したデータを標準出力に出力
-sys.stdout.buffer.write(bytes(received_data))
+sys.stdout.buffer.write(received_data)

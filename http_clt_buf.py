@@ -32,7 +32,7 @@ import sys
 
 # バッファ付きでのソケットからの読み出し用クラス
 class BufReader:
-    READBUF_LENGTH = 512
+    READBUF_LENGTH = 1024
     def __init__(self, sock, buffer_size=READBUF_LENGTH):
         self.sock = sock
         self.buf = b''
@@ -83,9 +83,9 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     # ヘッダを受信して解析・・・Content-Lengthを得る
     while True:
-        line = rf.readline().decode('utf-8')
-        chunks = line.split(':', 1)
-        if len(chunks) == 2 and chunks[0] == 'Content-Length':
+        line = rf.readline()
+        chunks = line.split(b':', 1)
+        if len(chunks) == 2 and chunks[0] == b'Content-Length':
             content_length = int(chunks[1])
         if len(line) == 0:
             break
