@@ -92,11 +92,14 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
 
     # データを受信
     received_data = b''
-    while len(received_data) < content_length:
-        received_bytes = rf.read()
-        if len(received_bytes) <= 0:
+    remained_bytes = content_length
+    while remained_bytes > 0:
+        data = rf.read(min(remained_bytes, rf.READBUF_LENGTH))
+        received_bytes = len(data)
+        if received_bytes <= 0:
             break
-        received_data += received_bytes
+        received_data += data
+        remained_bytes -= received_bytes
 
 # 受信したデータを標準出力に出力
 sys.stdout.buffer.write(received_data)
