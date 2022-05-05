@@ -32,7 +32,7 @@ import sys
 
 # バッファ付きでのソケットからの読み出し用クラス
 class BufReader:
-    READBUF_LENGTH = 1024
+    READBUF_LENGTH = 8192
     def __init__(self, sock, buffer_size=READBUF_LENGTH):
         self.sock = sock
         self.buf = b''
@@ -55,9 +55,17 @@ class BufReader:
         return line
 
     def read(self, maxlen=READBUF_LENGTH):
+        received_bytes = len(self.buf)
+        if received_bytes >= maxlen:
+            data = self.buf[:maxlen]
+            self.buf = self.buf[maxlen:]
+            return data
         data = self.buf
-        data += self.sock.recv(maxlen)
-        return data
+        newdata = self.sock.recv(maxlen-received_bytes)
+        if not newdata:
+            self.buffering = False
+        self.buf = b''
+        return data + newdata
 
 # コマンドラインからホスト名、パス名を読み込む
 if len(sys.argv) < 2:
