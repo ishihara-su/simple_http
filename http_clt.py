@@ -20,7 +20,7 @@
 import socket
 import sys
 
-READBUF_LENGTH = 1024
+READBUF_LENGTH = 8192
 
 # ソケットから1行分データを読み込む関数（行末の\r\nは返さない）
 def read_line_from_socket(s):
