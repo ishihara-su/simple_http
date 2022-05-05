@@ -22,3 +22,15 @@ Simple HTTP in Python3 - Susumu Ishihara <ishihara.susumu@shizuoka.ac.jp>
     receives data up to 1024 bytes from the server.
     - Example: `python3 tcp_client.py localhost`
       - You will be asked to type some text. Type something and hit Enter.
+
+- http_clt_buf.py
+  - Modified version of http_clt.py to use buffered I/O.
+  - Example:
+    - `python3 http_clt_buf.py doc.ishilab.net/edu/cn/`
+    - `python3 http_clt_buf.py doc.ishilab.net/edu/cn/apache_pb.gif > img.gif`
+
+- http_clt_requests.py
+  - HTTP client based on Requests library.
+  - Example:
+    - `python3 http_clt_requests.py https://doc.ishilab.net/edu/cn/`
+    - `python3 http_clt_requests.py http://doc.ishilab.net/edu/cn/apache_pb.gif > img.gif`
