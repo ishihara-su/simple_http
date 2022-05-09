@@ -32,40 +32,41 @@ import sys
 
 # バッファ付きでのソケットからの読み出し用クラス
 class BufReader:
-    READBUF_LENGTH = 8192
-    def __init__(self, sock, buffer_size=READBUF_LENGTH):
+    DEFAULT_READBUF_LENGTH = 8192
+    def __init__(self, sock, buffer_size=DEFAULT_READBUF_LENGTH):
         self.sock = sock
         self.buf = b''
-        self.buffering = True
         self.buffer_size = buffer_size
 
     def readline(self):
-        while self.buffering:
+        buffering = True
+        while buffering:
             if b'\r\n' in self.buf:
                 (line, self.buf) = self.buf.split(b'\r\n', 1)
                 return line
+            more = self.sock.recv(self.buffer_size)
+            if not more:
+               buffering = False
             else:
-                more = self.sock.recv(self.buffer_size)
-                if not more:
-                    self.buffering = False
-                else:
-                    self.buf += more
+               self.buf += more
         line = self.buf
         self.buf = b''
         return line
 
-    def read(self, maxlen=READBUF_LENGTH):
-        received_bytes = len(self.buf)
-        if received_bytes >= maxlen:
-            data = self.buf[:maxlen]
-            self.buf = self.buf[maxlen:]
-            return data
-        data = self.buf
-        newdata = self.sock.recv(maxlen-received_bytes)
-        if not newdata:
-            self.buffering = False
-        self.buf = b''
-        return data + newdata
+    def read(self, read_length):
+        remained_bytes = read_length
+        data = b''
+        while remained_bytes > 0:
+            if len(self.buf) >= remained_bytes:
+                data += self.buf[:remained_bytes]
+                self.buf = self.buf[remained_bytes:]
+                break
+            data += self.buf
+            remained_bytes -= len(self.buf)
+            self.buf = self.sock.recv(min(remained_bytes, self.buffer_size))
+            if not self.buf:
+                break
+        return data
 
 # コマンドラインからホスト名、パス名を読み込む
 if len(sys.argv) < 2:
@@ -99,15 +100,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             break
 
     # データを受信
-    received_data = b''
-    remained_bytes = content_length
-    while remained_bytes > 0:
-        data = rf.read(min(remained_bytes, rf.READBUF_LENGTH))
-        received_bytes = len(data)
-        if received_bytes <= 0:
-            break
-        received_data += data
-        remained_bytes -= received_bytes
+    received_data = rf.read(content_length)
 
 # 受信したデータを標準出力に出力
 sys.stdout.buffer.write(received_data)
