@@ -87,12 +87,12 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
     s.sendall(req_msg.encode())  # メッセージの文字列をバイト列に変換して送信
     header = ''
     content_length = 0
-    # 読み出し用のファイルオブジェクトを作る
-    rf = BufReader(s)
+    # 読み出し用のオブジェクトを作る
+    reader = BufReader(s)
 
     # ヘッダを受信して解析・・・Content-Lengthを得る
     while True:
-        line = rf.readline()
+        line = reader.readline()
         chunks = line.split(b':', 1)
         if len(chunks) == 2 and chunks[0] == b'Content-Length':
             content_length = int(chunks[1])
@@ -100,7 +100,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
             break
 
     # データを受信
-    received_data = rf.read(content_length)
+    received_data = reader.read(content_length)
 
 # 受信したデータを標準出力に出力
 sys.stdout.buffer.write(received_data)
